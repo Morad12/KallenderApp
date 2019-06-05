@@ -86,7 +86,7 @@ public class test {
 			
 			User user = new User("samira","neuemail@gmail,com","ne","morad", "12+3456");
 			
-			updateKonto(user, "passwort");
+//			updateKonto(user, "passwort");
 			
 			
 		} catch (Exception e) {
