@@ -2,6 +2,9 @@ package utilities;
 
 import java.io.Serializable;
 
+import exceptions.NewsException;
+import exceptions.TerminException;
+
 public class News implements Serializable {
 
 	private String senderUserName;
@@ -17,26 +20,28 @@ public class News implements Serializable {
 		this.newsId = 0;
 	}
 
-	public News(String senderUserName, String recipientUserName, int terminId, int newsId) {
+	public News(String senderUserName, String recipientUserName, int terminId, int newsId) throws NewsException {
 		super();
-		this.senderUserName = senderUserName;
-		this.recipientUserName = recipientUserName;
-		this.terminId = terminId;
-		this.newsId = newsId;
+		this.setSenderUserName (senderUserName);
+		this.setRecipientUserName(recipientUserName);
+		this.setTerminId(terminId);
+		this.setNewsId(newsId);
 	}
 
-	public News(String senderUserName, String recipientUserName, int terminId) {
+	public News(String senderUserName, String recipientUserName, int terminId) throws NewsException {
 		super();
-		this.senderUserName = senderUserName;
-		this.recipientUserName = recipientUserName;
-		this.terminId = terminId;
+		this.setSenderUserName (senderUserName);
+		this.setRecipientUserName(recipientUserName);
+		this.setTerminId(terminId);
 	}
 	
 	public String getSenderUserName() {
 		return senderUserName;
 	}
 
-	public void setSenderUserName(String senderUserName) {
+	public void setSenderUserName(String senderUserName) throws NewsException {
+		if(senderUserName.length() > 20 || senderUserName.isEmpty())
+			throw new NewsException("\nException: SenderUserName ist leer oder sher gross\n");
 		this.senderUserName = senderUserName;
 	}
 
@@ -44,7 +49,9 @@ public class News implements Serializable {
 		return recipientUserName;
 	}
 
-	public void setRecipientUserName(String recipientUserName) {
+	public void setRecipientUserName(String recipientUserName) throws NewsException {
+		if(recipientUserName.length() > 20 || recipientUserName.isEmpty())
+			throw new NewsException("\nException: RecipientUserName ist leer oder sher gross\n");
 		this.recipientUserName = recipientUserName;
 	}
 
@@ -52,7 +59,9 @@ public class News implements Serializable {
 		return terminId;
 	}
 
-	public void setTerminId(int terminId) {
+	public void setTerminId(int terminId) throws NewsException {
+		if(terminId < 0 || terminId > 9999)
+			throw new NewsException("terminId kleiner gleich 0 oder grosser als 9999");
 		this.terminId = terminId;
 	}
 
@@ -60,7 +69,9 @@ public class News implements Serializable {
 		return newsId;
 	}
 
-	public void setNewsId(int newsId) {
+	public void setNewsId(int newsId) throws NewsException {
+		if(newsId < 0 || newsId > 9999)
+			throw new NewsException("NewsId kleiner gleich 0 oder grosser als 9999");
 		this.newsId = newsId;
 	}
 

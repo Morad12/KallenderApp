@@ -3,6 +3,8 @@ package utilities;
 import java.io.Serializable;
 import java.util.Date;
 
+import exceptions.TerminException;
+
 public class Termin implements Serializable {
 	
 	private int terminId;
@@ -19,26 +21,28 @@ public class Termin implements Serializable {
 		this.dateTime = null;		
 	}
 	
-	public Termin(int terminId, String terminInhaber, String terminName, Date dateTime) {
-		super();
-		this.terminId = terminId;
-		this.terminInhaber = terminInhaber;
-		this.terminName = terminName;
-		this.dateTime = dateTime;
+	public Termin(int terminId, String terminInhaber, String terminName, Date dateTime) throws TerminException {
+		super();		
+		this.setTerminId(terminId);
+		this.setTerminInhaber(terminInhaber);
+		this.setTerminName(terminName);
+		this.setDateTime(dateTime);
 	}
 
-	public Termin(String terminInhaber, String terminName, Date dateTime) {
+	public Termin(String terminInhaber, String terminName, Date dateTime) throws TerminException {
 		super();
-		this.terminInhaber = terminInhaber;
-		this.terminName = terminName;
-		this.dateTime = dateTime;		
+		this.setTerminInhaber(terminInhaber);
+		this.setTerminName(terminName);
+		this.setDateTime(dateTime);		
 	}
 
 	public int getTerminId() {
 		return terminId;
 	}
 
-	public void setTerminId(int terminId) {
+	public void setTerminId(int terminId) throws TerminException {
+		if(terminId < 0 || terminId > 9999)
+			throw new TerminException("terminId kleiner gleich 0 oder grosser als 9999\n");
 		this.terminId = terminId;
 	}
 
@@ -46,7 +50,9 @@ public class Termin implements Serializable {
 		return terminInhaber;
 	}
 
-	public void setTerminInhaber(String terminInhaber) {
+	public void setTerminInhaber(String terminInhaber) throws TerminException {
+		if(terminInhaber.length() > 20 || terminInhaber.isEmpty())
+			throw new TerminException("\nterminInhaber ist leer oder sher gross\n");
 		this.terminInhaber = terminInhaber;
 	}
 
@@ -54,7 +60,9 @@ public class Termin implements Serializable {
 		return terminName;
 	}
 
-	public void setTerminName(String terminName) {
+	public void setTerminName(String terminName) throws TerminException {
+		if(terminName.length() > 20 || terminName.isEmpty())
+			throw new TerminException("\nterminName ist leer oder sher gross\n");
 		this.terminName = terminName;
 	}
 
@@ -62,7 +70,10 @@ public class Termin implements Serializable {
 		return dateTime;
 	}
 
-	public void setDateTime(Date dateTime) {
+	public void setDateTime(Date dateTime) throws TerminException {
+		java.util.Date now = new Date();
+		if(dateTime.before(now))
+			throw new TerminException("Termin in der vergangenheit ist nicht moeglich\n");
 		this.dateTime = dateTime;
 	}
 

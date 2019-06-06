@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.List;
 
 import dataBaseConnection.MySqlConnetion;
+import exceptions.NewsException;
+import exceptions.TerminException;
+import exceptions.UserException;
 import utilities.News;
 import utilities.Termin;
 import utilities.User;
@@ -18,41 +21,39 @@ public class KalenderAppImp extends UnicastRemoteObject implements KalenderApp {
 	}
 
 	@Override
-	public boolean creatKonto(User user) throws RemoteException, Exception {
+	public boolean creatKonto(User user) throws RemoteException, UserException, Exception {
 		
-		User null_test = MySqlConnetion.searchUser(user.getUserName(), "username");
-		if(null_test == null) {
-			null_test = MySqlConnetion.searchUser(user.getEmail(), "email");
-			if(null_test == null) {
+		User istUserda = MySqlConnetion.searchUser(user.getUserName(), "username");
+		if(istUserda == null) {
+			istUserda = MySqlConnetion.searchUser(user.getEmail(), "email");
+			if(istUserda == null) {
 				MySqlConnetion.insertUser(user);
 				return true;
 			}
-		}
-		return false;
+		}		
+		throw new UserException("User ist schon vorhanden\n");
 	}
 
 	@Override
-	public User login(String usernameORemail, String passwort) throws RemoteException, Exception{
+	public User login(String usernameORemail, String passwort) throws RemoteException, UserException, Exception{
 				
 		User user = MySqlConnetion.searchUser(usernameORemail, "username");
 		if(user == null) {
 			user = MySqlConnetion.searchUser(usernameORemail, "email");
 			if(user == null) {
-				System.out.println("Exiption user nicht gefunden(spaeter)");
+				throw new UserException("UserName oder Email nicht gefunden !\n");
 			}
 		}
 		if(user.getPasswort().equals(passwort)) {
-			System.out.println("sie sind eingeloggen");
+//			System.out.println("sie sind eingeloggen");
 			return user;
 		}
 		else 
-			System.out.println("passwort falsch !");
-			
-		return null;
+			throw new UserException("PassWort falsch !\n");
 	}
 
 	@Override
-	public boolean logout(User user) throws RemoteException, Exception {
+	public boolean logout(User user) throws RemoteException, Exception{
 		
 		User null_test = MySqlConnetion.searchUser(user.getUserName(), "username");
 		if(null_test == null) {
@@ -60,8 +61,7 @@ public class KalenderAppImp extends UnicastRemoteObject implements KalenderApp {
 			if(null_test == null) {				
 				return false;
 			}
-		}
-		
+		}	
 		return true;
 	}
 
@@ -72,7 +72,7 @@ public class KalenderAppImp extends UnicastRemoteObject implements KalenderApp {
 		if(userReturn == null) {
 			userReturn = MySqlConnetion.searchUser(user.getEmail(), "email");
 			if(userReturn == null) {				
-				System.out.println("Exeption");
+				throw new UserException("User nicht gefunden !\n");
 			}
 		}
 		MySqlConnetion.updateUser(user, where);
@@ -89,8 +89,7 @@ public class KalenderAppImp extends UnicastRemoteObject implements KalenderApp {
 		if(null_test == null) {
 			null_test = MySqlConnetion.searchUser(user.getEmail(), "email");
 			if(null_test == null) {	
-				System.out.println("Exception spaeter");
-				return false;
+				throw new UserException("User nicht gefunden !\n");
 			}
 		}
 		MySqlConnetion.deleteUser(user.getUserName());
@@ -98,12 +97,11 @@ public class KalenderAppImp extends UnicastRemoteObject implements KalenderApp {
 	}
 
 	@Override
-	public int addTermin(Termin termin) throws RemoteException, Exception {		
+	public int addTermin(Termin termin) throws RemoteException, Exception, TerminException, UserException{		
 
 		User user = MySqlConnetion.searchUser(termin.getTerminInhaber(), "username");
 		if(user == null) {
-			System.out.println("Exp");
-			return -1;
+			throw new UserException("User nicht gefunden !\n");
 		}
 		Termin termin1 = MySqlConnetion.searchTerminTime(termin.getTerminInhaber(), termin.getDateTime());
 		if(termin1 == null) {			
@@ -111,37 +109,36 @@ public class KalenderAppImp extends UnicastRemoteObject implements KalenderApp {
 			termin1 = MySqlConnetion.searchTerminTime(termin.getTerminInhaber(), termin.getDateTime());
 			return termin1.getTerminId();
 		}
-		return -1;
+		throw new TerminException("Termin schon vorhanden !\n");
 	}
 
 	@Override
-	public boolean deleteTermin(int terminId) throws RemoteException, Exception {
+	public boolean deleteTermin(int terminId) throws RemoteException, TerminException, Exception {
 		
 		Termin null_test = MySqlConnetion.searchTermin(terminId);
 		if(null_test != null) {			
 			MySqlConnetion.deleteTermin(terminId);
 			return true;
 		}		
-		return false;
+		throw new TerminException("Termin nicht gefunden !\n");
 	}
 
 	@Override
-	public Termin updateTermin(int terminId, String where) throws RemoteException, Exception {
+	public Termin updateTermin(int terminId, String where) throws RemoteException, TerminException, Exception {
 		
 		Termin termin = MySqlConnetion.searchTermin(terminId);
 		if(termin == null)
-			System.out.println("Exception");
+			throw new TerminException("Termin nicht gefunden !\n");
 		MySqlConnetion.updateTermin(termin, where);	
 		termin = MySqlConnetion.searchTermin(terminId);
 		return termin;
 	}
 	
 	@Override
-	public List<Termin> getMyTermine(String username) throws RemoteException, Exception{
+	public List<Termin> getMyTermine(String username) throws RemoteException, UserException, Exception{
 		User user = MySqlConnetion.searchUser(username, "username");
 		if(user == null) {
-			System.out.println("Exp");
-			return null;
+			throw new UserException("User nicht gefunden !\n");
 		}
 		List<Termin> termine = MySqlConnetion.getTermineInhaber(username);
 		return termine;
@@ -161,23 +158,21 @@ public class KalenderAppImp extends UnicastRemoteObject implements KalenderApp {
 	}
 
 	@Override
-	public boolean userEinladen(News news) throws Exception {
+	public boolean userEinladen(News news) throws UserException, TerminException, Exception {
 		
 		User null_test = MySqlConnetion.searchUser(news.getRecipientUserName(), "username");
 		if(null_test == null) {
-				System.out.println("Exp");
-				return false;
+			throw new UserException("User nicht gefunden !\n");
 		}
 		
 		Termin termin = MySqlConnetion.searchTermin(news.getTerminId());
 		if(termin == null) {
-			System.out.println("Exp");
-			return false;
+			throw new TerminException("Termin nicht gefunden !\n");
 		}
 		
 		News news1 = MySqlConnetion.searchNewsReciepientAndTerminId(news.getRecipientUserName(), news.getTerminId());
 		if(news1 != null) {
-			System.out.println("Exp");
+			throw new NewsException("News nicht gefunden");
 		}
 				
 		MySqlConnetion.insertNews(news);
@@ -195,21 +190,27 @@ public class KalenderAppImp extends UnicastRemoteObject implements KalenderApp {
 	}
 
 	@Override
-	public int acceptNews(News news) throws RemoteException, Exception {		
-				
+	public int acceptNews(News news) throws RemoteException, Exception {
+		
 		Termin termin = MySqlConnetion.searchTermin(news.getTerminId());
 		Termin neuTermin = new Termin(news.getRecipientUserName(), termin.getTerminName(), termin.getDateTime());
-		return addTermin(neuTermin);		
+		int terminId = addTermin(neuTermin);
+		deleteNews(news);
+		return terminId;		
 	}
 
 	@Override
-	public void deleteNews(News news) throws RemoteException, Exception {
-
+	public boolean deleteNews(News news) throws RemoteException, Exception {
+		
 		MySqlConnetion.deleteNews(news.getNewsId());
+		if(MySqlConnetion.searchNews(news.getNewsId()) == null)
+			return true;
+		return false;
 	} 
 
 	@Override
 	public boolean isEmailValide(String email) {
+		
 		String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
 		return email.matches(regex);
 	}

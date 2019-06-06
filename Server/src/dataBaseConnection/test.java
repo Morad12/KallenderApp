@@ -3,6 +3,10 @@ package dataBaseConnection;
 
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -84,9 +88,30 @@ public class test {
 //			System.out.println(emailValide("morad@gmailcom.ss"));
 			
 			
-			User user = new User("samira","neuemail@gmail,com","ne","morad", "12+3456");
+//			User user = new User("samira","neuemail@gmail,com","ne","morad", "12+3456");
 			
 //			updateKonto(user, "passwort");
+			
+			java.util.Date date1 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse("2018-07-06 17:05:00");
+			
+			Termin termin = new Termin("sanji","geburtstag",date1);
+			
+			addTermin(termin);
+			
+			
+			
+			
+			/*LocalDateTime.now();
+			
+			
+			DateTimeFormatter c = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			
+//			System.out.println(java.sql.Timestamp.valueOf(LocalDateTime.now().format(myFormatObj)));
+			System.out.println(LocalDateTime.now().format(myFormatObj));
+			
+			
+			System.out.println(java.util.Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));*/
+			
 			
 			
 		} catch (Exception e) {
