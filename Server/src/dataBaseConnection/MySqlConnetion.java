@@ -413,7 +413,7 @@ public class MySqlConnetion {
 	public static Connection getconnection() throws Exception  {
 		
 		String driver ="com.mysql.cj.jdbc.Driver";
-		String url = "jdbc:mysql://localhost:3306/kalender_db";
+                String url = "jdbc:mysql://localhost:3307/kalender_db";
 		String username = "root";
 		String password = "";
 		Class.forName(driver);
