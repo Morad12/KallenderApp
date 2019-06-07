@@ -10,14 +10,26 @@ import kalenderApp.KalenderApp;
 public class MainClass {
 
 	public static void main(String[] args) {
-		verbindungsfunktion();
+		
+		try {
+			KalenderApp stub = verbindungsfunktion();
+			Menu menu = new Menu(stub);
+			
+			menu.HauptMenu();
+			
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
+	
+	
+	
 	
 	public static KalenderApp verbindungsfunktion() {
 		KalenderApp stub = null;
 		try {
 			stub = (KalenderApp) Naming.lookup("rmi://localhost:1099/KalenderApp");
-			System.out.println("verbunden...\n");
+			//System.out.println("verbunden...\n");
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			System.out.println(e.toString());
 		}
