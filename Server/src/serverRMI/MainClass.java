@@ -11,6 +11,7 @@ public class MainClass {
 
 	public static void main(String[] args) {
 		try {
+			
 			LocateRegistry.createRegistry(1099);
 			KalenderAppImp od = new KalenderAppImp();
 			System.out.println(od.toString());

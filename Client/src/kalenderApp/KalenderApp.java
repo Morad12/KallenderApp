@@ -1,9 +1,11 @@
+    
 package kalenderApp;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import utilities.News;
 import utilities.Termin;
@@ -11,21 +13,24 @@ import utilities.User;
 
 public interface KalenderApp extends Remote {
 	
-	public boolean creatKonto(User user) throws RemoteException;
-	public User login(String userName, String passwort) throws RemoteException;
-	public boolean logout(User user) throws RemoteException;
-	public boolean updateKonto(User user) throws RemoteException;
-	public boolean deleteKonto(User user) throws RemoteException;
+	public boolean creatKonto(User user) throws RemoteException, Exception;
+	public User login(String username, String passwort) throws RemoteException, Exception;
+	public boolean logout(User user) throws RemoteException, Exception;
+	public User updateKonto(User user, String where) throws RemoteException, Exception;
+	public boolean deleteKonto(User user) throws RemoteException, Exception;
 	
-	public boolean addTermin(Termin termin) throws RemoteException;
-	public boolean deleteTermin(int terminId) throws RemoteException;
-	public Termin searchTermin(int terminId) throws RemoteException;
-	public Termin updateTermin(int terminId) throws RemoteException;
-	public ArrayList<Termin> searchSpan(Date von, Date bis) throws RemoteException;
+	public int addTermin(Termin termin) throws RemoteException, Exception;
+	public boolean deleteTermin(int terminId) throws RemoteException, Exception;
+	public Termin updateTermin(int terminId, String where) throws RemoteException, Exception;
+	public List<Termin> getMyTermine(String username) throws RemoteException, Exception;
+	public List<Termin> searchSpan(Date date_von, Date date_bis, String terminInhaber) throws RemoteException, Exception;
 	
-	public boolean userEinladen(User user, Termin termin) throws RemoteException;
-	public User searchUser(String userName, ArrayList<User> tab) throws RemoteException;
-	public ArrayList<News> getNews(User user) throws RemoteException;
-	public boolean deleteNews(int newsId) throws RemoteException;
+	public boolean userEinladen(News news) throws RemoteException, Exception;
+	public List<News> getNewsRecipientList(String recipientUsername) throws RemoteException, Exception;
+	public List<News> getNewsSenderList(String senderUsername) throws RemoteException, Exception;
+	public int acceptNews(News news) throws RemoteException, Exception;
+	public boolean deleteNews(News news) throws RemoteException, Exception;
+	
+	public boolean isEmailValide(String email)throws RemoteException;
 		
 }
