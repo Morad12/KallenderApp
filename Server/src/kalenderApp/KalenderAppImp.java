@@ -172,7 +172,7 @@ public class KalenderAppImp extends UnicastRemoteObject implements KalenderApp {
 		
 		News news1 = MySqlConnetion.searchNewsReciepientAndTerminId(news.getRecipientUserName(), news.getTerminId());
 		if(news1 != null) {
-			throw new NewsException("News nicht gefunden");
+			throw new NewsException("Termin schon besetzt!");
 		}
 				
 		MySqlConnetion.insertNews(news);

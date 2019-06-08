@@ -327,12 +327,12 @@ public class MySqlConnetion {
 		PreparedStatement preparedStmt = null;
 		
 		switch(where) {
-			case "terminInhaber":
+			/*case "terminInhaber":
 				String query0 = "update termin set termin_inhaber = ? where termin_id = ?";		
 				preparedStmt = conn.prepareStatement(query0);
 				preparedStmt.setString(1, termin.getTerminInhaber());
 				preparedStmt.setInt(2, termin.getTerminId());
-				break;
+				break;*/
 			case "terminName":
 				String query1 = "update termin set termin_name = ? where termin_id = ?";		
 				preparedStmt = conn.prepareStatement(query1);

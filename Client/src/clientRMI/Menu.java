@@ -17,14 +17,15 @@ public class Menu {
 
 	private static enum Login_Create{EXIT, LOGIN, CREATE};
 	private static enum News_Choice{WEITER, ANNEHMEN, ABLEHNEN};
-	private static enum News_Utilities{ZURUECK, TERMIN, ALLES};
+	private static enum News_Utilities{ZURUECK, NEWS, ALLES};
 	private static enum Konto_Utilities{ZURUECK, UPDATE, DELETE}
 	private static enum Konto_Manage{ZURUECK, PASSWORT, EMAIL, VORNAME, NACHNAME, ALLES};
-	private static enum Termin_Utilities{ZURUECK, ADD, UPDATE, DELETE, SHOWALL, SHOWTIME, INVITE, INVITATION}
+	private static enum Termin_Utilities{ZURUECK, ADD, UPDATE, DELETE, SHOWALL, SHOWTIME, INVITE, INVITATION};
+	private static enum Termin_Manage{ZURUECK, TITEL, DATE, ALLES};
 	private static enum Logged_Utilities{EXIT, KONTO, TERMIN};
 	private static enum Ja_Nein{JA, NEIN};
 	private static User user;
-	private static Scanner s = new Scanner(System.in);
+	private static Scanner s = new Scanner(System.in).useDelimiter("\n");
 	private static KalenderApp stub = null;
 	
 	Menu() {
@@ -74,7 +75,8 @@ public class Menu {
 	
 	public static void Menu_News(String username) {
 		
-		String eingabe = "";
+		int eingabe = 0;
+		int news_id = 0;
 		News_Choice choice = null;
 		News_Utilities accepted = null;
 		News_Utilities refused = null;
@@ -83,23 +85,22 @@ public class Menu {
 			List<News> NewsRecipientList = stub.getNewsRecipientList(username);
 			
 			for(int i = 0; i < NewsRecipientList.size(); i++) {
-				System.out.println((i+1)+": "+ NewsRecipientList.get(i).toString());
+				System.out.print((i+1)+": "+ NewsRecipientList.get(i).toString());
 			}
 			System.out.print("\nWollen Sie:\n"
 					+ "1. Annehmen.\n"
 					+ "2. Ablehnen.\n"
 					+ "0. Weiter.\n"
 					+ "Wählen Sie: ");
-			eingabe = s.next();
-			while(!eingabe.equals("0") && 
-					!eingabe.equals("1") && 
-					!eingabe.equals("2")){
+			eingabe = isNumber();
+			
+			while(eingabe < 0 || eingabe > 2){
 				
 				System.out.print("Falsche Eingabe! Wiederholen: ");
-				eingabe = s.next();
+				eingabe = isNumber();
 			}
 			
-			choice = News_Choice.values()[Integer.valueOf(eingabe)];
+			choice = News_Choice.values()[eingabe];
 			
 			switch(choice) {
 			case ANNEHMEN:
@@ -108,27 +109,27 @@ public class Menu {
 						+ "2. Alles annehmen.\n"
 						+ "0. Zurück.\n"
 						+ "Wählen Sie: ");
-				eingabe = s.next();
-				while(!eingabe.equals("0") && 
-						!eingabe.equals("1") && 
-						!eingabe.equals("2")){
+				eingabe = isNumber();
+				
+				while(eingabe < 0 || eingabe > 2){
 					
 					System.out.print("Falsche Eingabe! Wiederholen: ");
-					eingabe = s.next();
+					eingabe = isNumber();
 				}
 				
-				accepted = News_Utilities.values()[Integer.valueOf(eingabe)];
+				accepted = News_Utilities.values()[eingabe];
 				
 				switch(accepted) {
-				case TERMIN:
+				case NEWS:
 					System.out.print("Geben Sie Bitte die Zahl des News ein: ");
-					eingabe = s.next();
-					while(Integer.valueOf(eingabe) <= 0 || Integer.valueOf(eingabe) > NewsRecipientList.size()) {
+					news_id = isNumber();
+					
+					while(news_id <= 0 || news_id > NewsRecipientList.size()) {
 						System.out.print("Falsche Eingabe! Wiederholen: ");
-						eingabe = s.next();
+						news_id = isNumber();
 					}
 					
-					if(stub.acceptNews(NewsRecipientList.get(Integer.valueOf(eingabe)-1)) != -1){
+					if(stub.acceptNews(NewsRecipientList.get(news_id - 1)) != -1){
 						System.out.println("Termin hinzugefügt");
 						Menu_Logged();
 					}
@@ -161,27 +162,27 @@ public class Menu {
 						+ "2. Alles ablehnen.\n"
 						+ "0. Zurück.\n"
 						+ "Wählen Sie: ");
-				eingabe = s.next();
-				while(!eingabe.equals("0") && 
-						!eingabe.equals("1") && 
-						!eingabe.equals("2")){
+				eingabe = isNumber();
+				
+				while(eingabe < 0 || eingabe > 2){
 					
 					System.out.print("Falsche Eingabe! Wiederholen: ");
-					eingabe = s.next();
+					eingabe = isNumber();
 				}
 				
-				refused = News_Utilities.values()[Integer.valueOf(eingabe)];
+				refused = News_Utilities.values()[eingabe];
 				
 				switch(refused) {
-				case TERMIN:
+				case NEWS:
 					System.out.print("Geben Sie Bitte die Zahl des News ein: ");
-					eingabe = s.next();
-					while(Integer.valueOf(eingabe) <= 0 || Integer.valueOf(eingabe) > NewsRecipientList.size()) {
+					news_id = isNumber();
+					
+					while(news_id <= 0 || news_id > NewsRecipientList.size()) {
 						System.out.print("Falsche Eingabe! Wiederholen: ");
-						eingabe = s.next();
+						news_id = isNumber();
 					}
 					
-					if(stub.deleteNews(NewsRecipientList.get(Integer.valueOf(eingabe)-1))){
+					if(stub.deleteNews(NewsRecipientList.get(news_id - 1))){
 						System.out.println("Termin abgelehnt");
 						Menu_Logged();
 					}
@@ -226,6 +227,7 @@ public class Menu {
 		char[] pwd = null;
 		String confirm = null;
 		Ja_Nein antwort = null;
+		
 		try {
 			do {
 				System.out.print("Geben Sie ihren Benutzernamen ein: ");
@@ -243,7 +245,7 @@ public class Menu {
 				if(user != null) {
 					NewsRecipientList = stub.getNewsRecipientList(user.getUserName());
 					System.out.println("\nWillkomen "+user.getNachname()+", Sie sind eingeloggen.");
-					System.out.println("Sie haben "+NewsRecipientList.size() + " Notification(s).");
+					System.out.println("Sie haben "+ NewsRecipientList.size() + " Notification(s).");
 					
 					if(NewsRecipientList.size() > 0) {
 						System.out.print("Wollen Sie die zeigen?(ja/nein): ");
@@ -305,6 +307,7 @@ public class Menu {
 		String confirm = null;
 		Ja_Nein antwort = null;
 		List<News> NewsRecipientList = null;
+		
 		boolean created = false;
 		
 		try {
@@ -386,38 +389,35 @@ public class Menu {
 	
 	public static boolean Login_Menu(){
 		
-		String eingabe = "";
+		int eingabe = 0;
 		Login_Create input = null;
 		
-			System.out.print("\nWollen Sie:\n"
-					+ "1. Login.\n"
-					+ "2. Konto erstellen.\n"
-					+ "0. Abbrechen.\n"
-					+ "Wählen Sie: ");
-			eingabe = s.next();
+		System.out.print("\nWollen Sie:\n"
+				+ "1. Login.\n"
+				+ "2. Konto erstellen.\n"
+				+ "0. Abbrechen.\n"
+				+ "Wählen Sie: ");
+		eingabe = isNumber();
 			
-			
-			while(!eingabe.equals("0") && 
-					!eingabe.equals("1") && 
-					!eingabe.equals("2")){
+		while(eingabe < 0 || eingabe > 2){
 				
-				System.out.print("Falsche Eingabe! Wiederholen: ");
-				eingabe = s.next();
-			}
-			input = Login_Create.values()[Integer.valueOf(eingabe)];
+			System.out.print("Falsche Eingabe! Wiederholen: ");
+			eingabe = isNumber();
+		}
+		input = Login_Create.values()[eingabe];
 			
-			switch(input) {
-			case LOGIN:
-				Login();
-				break;
-			case CREATE:
-				Create();
-				break;
-			case EXIT:
-				System.out.println("Auf wiedersehen!");
-				System.exit(0);
-				break;
-			}
+		switch(input) {
+		case LOGIN:
+			Login();
+			break;
+		case CREATE:
+			Create();
+			break;
+		case EXIT:
+			System.out.println("Auf wiedersehen!");
+			System.exit(0);
+			break;
+		}
 		
 		return false;
 	}
@@ -425,7 +425,7 @@ public class Menu {
 	public static boolean Konto_Update() {
 		
 		Console console = System.console();
-		String eingabe = "";
+		int eingabe = 0;
 		char[] pwd = null;
 		String passwort = "";
 		String nachName = "";
@@ -444,19 +444,14 @@ public class Menu {
 					+ "5. Alles.\n"
 					+ "0. Zuruck.\n"
 					+ "Wählen Sie: ");
-			eingabe = s.next();
+			eingabe = isNumber();
 			
-			while(!eingabe.equals("0") && 
-					!eingabe.equals("1") && 
-					!eingabe.equals("2") &&						
-					!eingabe.equals("3") && 
-					!eingabe.equals("4") && 
-					!eingabe.equals("5")){
+			while(eingabe < 0 || eingabe > 5){
 				
 				System.out.print("Falsche Eingabe! Wiederholen: ");
-				eingabe = s.next();
+				eingabe = isNumber();
 			}
-				manage = Konto_Manage.values()[Integer.valueOf(eingabe)];
+				manage = Konto_Manage.values()[eingabe];
 				
 				switch(manage) {
 				case PASSWORT:
@@ -650,23 +645,22 @@ public class Menu {
 	
 	public static void Konto_Menu() {
 		
-		String eingabe = "";
+		int eingabe = 0;
 		Konto_Utilities input = null;
 			System.out.print("\nWollen Sie Ihr Konto: \n"
 					+ "1. Bearbeiten.\n"
 					+ "2. Löschen.\n"
 					+ "0. Zurück.\n"
 					+ "Wählen Sie: ");
-			eingabe = s.next();
+			eingabe = isNumber();
 			
-			while(!eingabe.equals("0") && 
-					!eingabe.equals("1") && 
-					!eingabe.equals("2")){
+			while(eingabe < 0 || eingabe > 2){
 				
 				System.out.print("Falsche Eingabe! Wiederholen: ");
-				eingabe = s.next();
+				eingabe = isNumber();
 			}
-			input = Konto_Utilities.values()[Integer.valueOf(eingabe)];
+			
+			input = Konto_Utilities.values()[eingabe];
 			
 			switch(input) {
 			case UPDATE:
@@ -682,7 +676,7 @@ public class Menu {
 		return;
 	}
 	
-	public static int Termin_Add() {
+	public static Termin Termin_Add() {
 		
 		Termin termin = null;
 		String titel = "";
@@ -734,7 +728,7 @@ public class Menu {
 				year = isNumber();
 			}
 			
-			System.out.print("Geben Sie die Stunde ein: ");
+			System.out.print("Geben Sie die Stunden ein: ");
 			hour = isNumber();
 			while(hour < 0 || hour > 23) {
 				System.out.print("Geben Sie eine gültige Zahl ein: ");
@@ -794,35 +788,599 @@ public class Menu {
 				if(termin_Id < 0) {
 					System.out.println("Termin nicht hinzugefügt!");
 					Termin_Menu();
-					return -1;
+					return null;
 				}
 				else {
 					System.out.println("Termin ist hinzugefügt!");
 					Termin_Menu();
-					return termin_Id;
+					return termin;
 				}
 			}
-			else
+			else {
 				Menu_Logged();
+				return null;
+			}
 				
 			
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
 		
-		return -1;
+		return null;
+	}
+	
+	public static boolean Termin_Delete(List<Termin> termine) {
+		
+		int termin_Id = 0;
+		String confirm = "";
+		Ja_Nein antwort = null;
+		try {
+			System.out.print("Wählen Sie den Termin zu löschen: ");
+			termin_Id = isNumber();
+			
+			while(termin_Id <= 0 || termin_Id > termine.size()){
+				
+				System.out.print("Falsche Eingabe! Wiederholen: ");
+				termin_Id = isNumber();
+			}
+			
+			System.out.print("Sind Sie sicher, dass Sie den Termin löschen wollen?(ja/nein): ");
+			
+			confirm = s.next();
+			
+			while(!confirm.equalsIgnoreCase("ja") &&
+					!confirm.equalsIgnoreCase("nein")){
+				
+				System.out.print("Falsche Eingabe! Wiederholen: ");
+				confirm = s.next();
+			}
+			
+			antwort = Ja_Nein.valueOf(confirm.toUpperCase());
+			
+			if(antwort == Ja_Nein.JA) {
+				if(stub.deleteTermin(termin_Id - 1)) {
+					System.out.println("Termin ist gelöscht");
+					Termin_Menu();
+					termin_Id = 0;
+					return true;
+				}
+				else {
+					System.out.println("Termin ist nicht gelöscht");
+					Termin_Menu();
+					return false;
+				}
+			}
+			else {
+				Termin_Menu();
+				return false;
+			}
+			
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+		
+		return false;
+	}
+	
+	public static boolean Termin_Update(List<Termin> termine) {
+		
+		int eingabe = 0;
+		String confirm = "";
+		Ja_Nein antwort = null;
+		Termin_Manage manage = null;
+		String titel = "";
+		int year = 0;
+		int month = 0;
+		int day = 0;
+		int hour = 0;
+		int minute = 0;
+		int second = 0;
+		String day_parse = "";
+		String month_parse = "";
+		String hour_parse = "";
+		String minute_parse = "";
+		String second_parse = "";
+		Termin termin = null;
+		int termin_Id = 0;
+		Date t_datum = null;
+		
+		try {
+			System.out.print("Wählen Sie den Termin zu bearbeiten: ");
+			termin_Id = isNumber();
+			
+			while(termin_Id <= 0 || termin_Id > termine.size()){
+				
+				System.out.print("Falsche Eingabe! Wiederholen: ");
+				termin_Id = isNumber();
+			}
+			
+			System.out.print("Was wollen ändern:\n"
+					+ "1. Titel.\n"
+					+ "2. Datum.\n"
+					+ "3. Alles.\n"
+					+ "0. Zurück.\n"
+					+ "Wählen Sie: ");
+			eingabe = isNumber();
+			
+			while(eingabe < 0 || eingabe > 3){
+				
+				System.out.print("Falsche Eingabe! Wiederholen: ");
+				eingabe = isNumber();
+			}
+			
+			manage = Termin_Manage.values()[eingabe];
+			
+			switch(manage) {
+			case TITEL:
+				System.out.print("Geben Sie einen neuen Titel des Ereignis ein: ");
+				titel = s.next(); //Exception
+				break;
+			case DATE:
+				System.out.print("Geben Sie den neuen Tag ein: ");
+				day = isNumber();
+				while(day <= 0 || day > 31) {
+					System.out.print("Geben Sie eine gültige Zahl ein: ");
+					day = isNumber();
+				}
+				if(day < 10)
+					day_parse = "0"+day;
+				else
+					day_parse = String.valueOf(day);
+				
+				System.out.print("Geben Sie den neuen Monat ein: ");
+				month = isNumber();
+				while(month <= 0 || month > 12) {
+					System.out.print("Geben Sie eine gültige Zahl ein: ");
+					month = isNumber();
+				}
+				if(month < 10)
+					month_parse = "0"+month;
+				else
+					month_parse = String.valueOf(month);
+				
+				System.out.print("Geben Sie das neue Jahr ein: ");
+				year = isNumber();
+				while(year < Calendar.getInstance().get(Calendar.YEAR)) {
+					System.out.print("Geben Sie eine gültige Zahl ein: ");
+					year = isNumber();
+				}
+				
+				System.out.print("Geben Sie die neuen Stunden ein: ");
+				hour = isNumber();
+				while(hour < 0 || hour > 23) {
+					System.out.print("Geben Sie eine gültige Zahl ein: ");
+					hour = isNumber();
+				}
+				if(hour < 10)
+					hour_parse = "0"+hour;
+				else
+					hour_parse = String.valueOf(hour);
+				
+				System.out.print("Geben Sie die neuen Minute ein: ");
+				minute = isNumber();
+				while(minute < 0 || minute > 59) {
+					System.out.print("Geben Sie eine gültige Zahl ein: ");
+					minute = isNumber();
+				}
+				if(minute < 10)
+					minute_parse = "0"+minute;
+				else
+					minute_parse = String.valueOf(minute);
+				
+				System.out.print("Geben Sie die neuen Sekunden ein: ");
+				second = isNumber();
+				while(second < 0 || second > 59) {
+					System.out.print("Geben Sie eine gültige Zahl ein: ");
+					second = isNumber();
+				}
+				if(second < 10)
+					second_parse = "0"+second;
+				else
+					second_parse = String.valueOf(second);
+				
+				t_datum = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(year + "-" 
+						+ month_parse + "-"
+						+ day_parse + " "
+						+ hour_parse + ":"
+						+ minute_parse + ":"
+						+ second_parse);
+				break;
+			case ALLES:
+				System.out.print("Geben Sie einen neuen Titel des Ereignis ein: ");
+				titel = s.next(); //Exception
+				
+				System.out.print("Geben Sie den neuen Tag ein: ");
+				day = isNumber();
+				while(day <= 0 || day > 31) {
+					System.out.print("Geben Sie eine gültige Zahl ein: ");
+					day = isNumber();
+				}
+				if(day < 10)
+					day_parse = "0"+day;
+				else
+					day_parse = String.valueOf(day);
+				
+				System.out.print("Geben Sie den neuen Monat ein: ");
+				month = isNumber();
+				while(month <= 0 || month > 12) {
+					System.out.print("Geben Sie eine gültige Zahl ein: ");
+					month = isNumber();
+				}
+				
+				if(month < 10)
+					month_parse = "0"+month;
+				else
+					month_parse = String.valueOf(month);
+				
+				System.out.print("Geben Sie das neue Jahr ein: ");
+				year = isNumber();
+				while(year < Calendar.getInstance().get(Calendar.YEAR)) {
+					System.out.print("Geben Sie eine gültige Zahl ein: ");
+					year = isNumber();
+				}
+				
+				System.out.print("Geben Sie die neuen Stunden ein: ");
+				hour = isNumber();
+				while(hour < 0 || hour > 23) {
+					System.out.print("Geben Sie eine gültige Zahl ein: ");
+					hour = isNumber();
+				}
+				if(hour < 10)
+					hour_parse = "0"+hour;
+				else
+					hour_parse = String.valueOf(hour);
+				
+				System.out.print("Geben Sie die neuen Minute ein: ");
+				minute = isNumber();
+				while(minute < 0 || minute > 59) {
+					System.out.print("Geben Sie eine gültige Zahl ein: ");
+					minute = isNumber();
+				}
+				if(minute < 10)
+					minute_parse = "0"+minute;
+				else
+					minute_parse = String.valueOf(minute);
+				
+				System.out.print("Geben Sie die neuen Sekunden ein: ");
+				second = isNumber();
+				while(second < 0 || second > 59) {
+					System.out.print("Geben Sie eine gültige Zahl ein: ");
+					second = isNumber();
+				}
+				if(second < 10)
+					second_parse = "0"+second;
+				else
+					second_parse = String.valueOf(second);
+				
+				t_datum = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(year + "-" 
+						+ month_parse + "-"
+						+ day_parse + " "
+						+ hour_parse + ":"
+						+ minute_parse + ":"
+						+ second_parse);
+				break;
+			case ZURUECK:
+				Termin_Menu();
+				break;
+			}
+			
+			System.out.print("Sind Sie sicher, dass Sie Ihr Konto bearbeiten wollen?(ja/nein): ");
+			confirm = s.next();
+			while(!confirm.equalsIgnoreCase("ja") &&
+					!confirm.equalsIgnoreCase("nein")){
+				
+				System.out.print("Falsche Eingabe! Wiederholen: ");
+				confirm = s.next();
+			}
+			antwort = Ja_Nein.valueOf(confirm.toUpperCase());
+			
+			if(antwort == Ja_Nein.JA) {
+				
+				if(t_datum != null && !titel.isEmpty()) {
+					termin = termine.get(termin_Id - 1);
+					termin.setDateTime(t_datum);
+					termin.setTerminName(titel);
+					if(stub.updateTermin(termin.getTerminId(), "terminName") != null) {
+						if(stub.updateTermin(termin.getTerminId(), "terminDateTime") != null) {
+							System.out.println("Termin is updated!");
+							t_datum = null;
+							termin = null;
+							titel = "";
+							Termin_Menu();
+							return true;
+						}
+					}
+					else {
+						System.out.println("Termin is not updated!");
+						Termin_Menu();
+						return false;
+					}
+				}
+				
+				if(!titel.isEmpty()) {
+					termin = termine.get(termin_Id - 1);
+					termin.setTerminName(titel);
+					if(stub.updateTermin(termin.getTerminId(), "terminName") != null) {
+						System.out.println("Titel is updated!");
+						titel = "";
+						termin = null;
+						Termin_Menu();
+						return true;
+					}
+					else
+					{
+						System.out.println("Titel is not updated!");
+						Termin_Menu();
+						return false;
+					}
+				}
+				
+				if(t_datum != null) {
+					termin = termine.get(termin_Id - 1);
+					termin.setDateTime(t_datum);
+					
+					if(stub.updateTermin(termin.getTerminId(), "terminDateTime") != null) {
+						System.out.println("Date is updated!");
+						termin = null;
+						t_datum = null;
+						Termin_Menu();
+						return true;
+					}
+					else {
+						System.out.println("Date is not updated!");
+						Termin_Menu();
+						return false;
+					}
+				}
+			}
+			else {
+				Termin_Menu();
+				return false;
+			}
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+		
+		return false;
+	}
+	
+	public static boolean Einladen(List<Termin> termine) {
+		
+		int termin_Id = 0;
+		News news = null;
+		String recipient = "";
+		String confirm = "";
+		Ja_Nein antwort = null;
+		
+		try {
+			System.out.println("Wen wollen Sie einladen!: ");
+			recipient = s.next(); // Exception
+			//System.out.println("Ihre Termine sind: ");
+			//Termin_ShowAll(termine);
+			System.out.print("An welchen Termin wollen Sie Sie einladen?: ");
+			termin_Id = s.nextInt();
+			
+			System.out.print("Sind Sie sicher, dass Sie Sie einladen wollen?(ja/nein): ");
+			confirm = s.next();
+			
+			while(!confirm.equalsIgnoreCase("ja") &&
+					!confirm.equalsIgnoreCase("nein")){
+				
+				System.out.print("Falsche Eingabe! Wiederholen: ");
+				confirm = s.next();
+			}
+			antwort = Ja_Nein.valueOf(confirm.toUpperCase());
+			
+			if(antwort == Ja_Nein.JA) {
+				
+				news = new News(user.getUserName(),recipient , termine.get(termin_Id - 1).getTerminId());
+				if(stub.userEinladen(news)) {
+					System.out.println("User ist eingeladen.");
+					Termin_Menu();
+					return true;
+				}
+				else {
+					System.out.println("User konnte nicht eingeladen sein.");
+					Termin_Menu();
+					return false;
+				}
+			}
+			else
+				Termin_Menu();
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return false;
+	}
+	
+	public static void Termin_ShowAll(List<Termin> termine) {
+		
+		for(int i = 0; i < termine.size();i ++)
+			System.out.println((i+1) + ":" + termine.get(i).toString());
+	}
+	
+	public static void Termin_Span() {
+		
+		int year = 0;
+		int month = 0;
+		int day = 0;
+		int hour = 0;
+		int minute = 0;
+		int second = 0;
+		String day_parse = "";
+		String month_parse = "";
+		String hour_parse = "";
+		String minute_parse = "";
+		String second_parse = "";
+		Date t_datumv = null;
+		Date t_datumb = null;
+		List<Termin> termine = null;
+		
+		try {
+			System.out.println("Geben Sie die Datum von ein: ");
+			System.out.print("Geben Sie den Tag ein: ");
+			day = isNumber();
+			while(day <= 0 || day > 31) {
+				System.out.print("Geben Sie eine gültige Zahl ein: ");
+				day = isNumber();
+			}
+			if(day < 10)
+				day_parse = "0"+day;
+			else
+				day_parse = String.valueOf(day);
+			
+			System.out.print("Geben Sie den Monat ein: ");
+			month = isNumber();
+			while(month <= 0 || month > 12) {
+				System.out.print("Geben Sie eine gültige Zahl ein: ");
+				month = isNumber();
+			}
+			if(month < 10)
+				month_parse = "0"+month;
+			else
+				month_parse = String.valueOf(month);
+			
+			System.out.print("Geben Sie das Jahr ein: ");
+			year = isNumber();
+			while(year < Calendar.getInstance().get(Calendar.YEAR)) {
+				System.out.print("Geben Sie eine gültige Zahl ein: ");
+				year = isNumber();
+			}
+			
+			System.out.print("Geben Sie die Stunden ein: ");
+			hour = isNumber();
+			while(hour < 0 || hour > 23) {
+				System.out.print("Geben Sie eine gültige Zahl ein: ");
+				hour = isNumber();
+			}
+			if(hour < 10)
+				hour_parse = "0"+hour;
+			else
+				hour_parse = String.valueOf(hour);
+			
+			System.out.print("Geben Sie die Minuten ein: ");
+			minute = isNumber();
+			while(minute < 0 || minute > 59) {
+				System.out.print("Geben Sie eine gültige Zahl ein: ");
+				minute = isNumber();
+			}
+			if(minute < 10)
+				minute_parse = "0"+minute;
+			else
+				minute_parse = String.valueOf(minute);
+			
+			System.out.print("Geben Sie die Sekunden ein: ");
+			second = isNumber();
+			while(second < 0 || second > 59) {
+				System.out.print("Geben Sie eine gültige Zahl ein: ");
+				second = isNumber();
+			}
+			if(second < 10)
+				second_parse = "0"+second;
+			else
+				second_parse = String.valueOf(second);
+			
+			t_datumv = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(year + "-" 
+					+ month_parse + "-"
+					+ day_parse + " "
+					+ hour_parse + ":"
+					+ minute_parse + ":"
+					+ second_parse);
+			
+			System.out.println("Geben Sie die Datum bis ein: ");
+			System.out.print("Geben Sie den Tag ein: ");
+			day = isNumber();
+			while(day <= 0 || day > 31) {
+				System.out.print("Geben Sie eine gültige Zahl ein: ");
+				day = isNumber();
+			}
+			if(day < 10)
+				day_parse = "0"+day;
+			else
+				day_parse = String.valueOf(day);
+			
+			System.out.print("Geben Sie den Monat ein: ");
+			month = isNumber();
+			while(month <= 0 || month > 12) {
+				System.out.print("Geben Sie eine gültige Zahl ein: ");
+				month = isNumber();
+			}
+			if(month < 10)
+				month_parse = "0"+month;
+			else
+				month_parse = String.valueOf(month);
+			
+			System.out.print("Geben Sie das Jahr ein: ");
+			year = isNumber();
+			while(year < Calendar.getInstance().get(Calendar.YEAR)) {
+				System.out.print("Geben Sie eine gültige Zahl ein: ");
+				year = isNumber();
+			}
+			
+			System.out.print("Geben Sie die Stunden ein: ");
+			hour = isNumber();
+			while(hour < 0 || hour > 23) {
+				System.out.print("Geben Sie eine gültige Zahl ein: ");
+				hour = isNumber();
+			}
+			if(hour < 10)
+				hour_parse = "0"+hour;
+			else
+				hour_parse = String.valueOf(hour);
+			
+			System.out.print("Geben Sie die Minuten ein: ");
+			minute = isNumber();
+			while(minute < 0 || minute > 59) {
+				System.out.print("Geben Sie eine gültige Zahl ein: ");
+				minute = isNumber();
+			}
+			if(minute < 10)
+				minute_parse = "0"+minute;
+			else
+				minute_parse = String.valueOf(minute);
+			
+			System.out.print("Geben Sie die Sekunden ein: ");
+			second = isNumber();
+			while(second < 0 || second > 59) {
+				System.out.print("Geben Sie eine gültige Zahl ein: ");
+				second = isNumber();
+			}
+			if(second < 10)
+				second_parse = "0"+second;
+			else
+				second_parse = String.valueOf(second);
+			
+			t_datumb = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(year + "-" 
+					+ month_parse + "-"
+					+ day_parse + " "
+					+ hour_parse + ":"
+					+ minute_parse + ":"
+					+ second_parse);
+			termine = stub.searchSpan(t_datumv, t_datumb, user.getUserName());
+			
+			for(Termin t : termine) {
+				int i = 1;
+				System.out.println(i + ": " + t.toString());
+			}
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	public static void Invitation(List<News> NewsSenderList) {
+		int i = 1;
+		for(News n : NewsSenderList) {
+			System.out.println(i + ": " + n.toString());
+			i++;
+		}
 	}
 	
 	public static void Termin_Menu() {
 		
-		Termin termin = null;
-		int termin_Id = 0;
-		String eingabe = "";
-		String confirm = "";
-		Ja_Nein antwort = null;
-		Date t_datum = new Date();
+		int eingabe = 0;
 		Termin_Utilities input = null;
 		List<Termin> termine = null;
+		List<News> NewsSenderList = null;
 		
 		try {
 			System.out.print("\nWollen Sie: \n"
@@ -835,43 +1393,46 @@ public class Menu {
 					+ "7. Gesendete Einladungen.\n"
 					+ "0. Zurueck.\n"
 					+ "Wählen Sie: ");
-			eingabe = s.next();
+			eingabe = isNumber();
 			
-			while(!eingabe.equals("0") && 
-					!eingabe.equals("1") && 
-					!eingabe.equals("2") &&
-					!eingabe.equals("3") && 
-					!eingabe.equals("4") && 
-					!eingabe.equals("5") && 
-					!eingabe.equals("6") && 
-					!eingabe.equals("7")){
+			while(eingabe < 0 || eingabe > 7){
 				
 				System.out.print("Falsche Eingabe! Wiederholen: ");
-				eingabe = s.next();
+				eingabe = isNumber();
 			}
 			
-			input = Termin_Utilities.values()[Integer.valueOf(eingabe)];
+			input = Termin_Utilities.values()[eingabe];
+			
+			termine = stub.getMyTermine(user.getUserName());
+			NewsSenderList = stub.getNewsSenderList(user.getUserName());
 			
 			switch(input) {
 			case ADD:
-				termin_Id = Termin_Add();
+				Termin_Add();
 				break;
 			case UPDATE:
+				//System.out.println("Ihre Termine sind: ");
+				//Termin_ShowAll(termine);
+				Termin_Update(termine);
 				break;
 			case DELETE:
-				System.out.print("");
+				//System.out.println("Ihre Termine sind: ");
+				//Termin_ShowAll(termine);
+				Termin_Delete(termine);
 				break;
 			case SHOWALL:
-				System.out.println(user.getUserName());
-				termine = stub.getMyTermine(user.getUserName());
-				//for(Termin t : termine)
-					System.out.println(termine.size());
+				Termin_ShowAll(termine);
+				Termin_Menu();
 				break;
 			case SHOWTIME:
+				Termin_Span();
 				break;
 			case INVITE:
+				Einladen(termine);
 				break;
 			case INVITATION:
+				Invitation(NewsSenderList);
+				Termin_Menu();
 				break;
 			case ZURUECK:
 				Menu_Logged();
@@ -884,7 +1445,7 @@ public class Menu {
 	}
 	
 	public static void Menu_Logged() {
-		String eingabe = "";
+		int eingabe = 0;
 		Logged_Utilities input = null;
 		
 		try {
@@ -893,16 +1454,14 @@ public class Menu {
 					+ "2. Ihre Termine verwalten.\n"
 					+ "0. Abbrechen.\n"
 					+ "Wählen Sie: ");
-			eingabe = s.next();
+			eingabe = isNumber();
 			
-			while(!eingabe.equals("0") &&
-					!eingabe.equals("1") &&
-					!eingabe.equals("2")){
+			while(eingabe < 0 || eingabe > 2){
 				
 				System.out.print("Falsche Eingabe! Wiederholen: ");
-				eingabe = s.next();
+				eingabe = isNumber();
 			}
-			input = Logged_Utilities.values()[Integer.valueOf(eingabe)];
+			input = Logged_Utilities.values()[eingabe];
 		
 			switch(input) {
 			case KONTO:
